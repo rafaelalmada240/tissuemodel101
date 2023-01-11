@@ -35,10 +35,13 @@ def restart_kernel_and_run_all_cells():
 # Plot frames from different time steps   
 
 
-def saveframe(x_array, v_array, ridge_array, N_init,N_fin,f_step,file_path):
+def saveframe(x_array, v_array, ridge_array_1, N_init,N_fin,f_step,file_path):
     t_initial = time.time() #time where the printing of frames starts
     for k in range(N_init,N_fin,f_step):
         plt.figure(figsize=(16,16))
+        
+        ridge_array = ridge_array_1[:,:,k].astype(int)
+        
 
         for i in range(len(ridge_array)):
            
@@ -100,10 +103,10 @@ makemovie(coords_evo,coords_evo_vertex, ridge_vectors)
 prompt = int(input('Do you want to make the movie now [y(1),n(0)]: '))
 if prompt == 1:
         
-    N_init = int(input('Starting frame: '))
+    N_init = 0#int(input('Starting frame: '))
     N_end = int(input('Stopping frame: '))
-    fr_step = int(input('Frame step: '))
-    file_path = input('Image File Path: ')
+    fr_step = 1#int(input('Frame step: '))
+    file_path = 'f'#input('Image File Path: ')
     filename = input('Video file name (with .mp4 included): ')
         
     img_array,size = mfp.loadframe(N_init,N_end,fr_step,file_path)
