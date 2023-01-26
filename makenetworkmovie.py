@@ -38,7 +38,7 @@ def restart_kernel_and_run_all_cells():
 def saveframe(x_array, v_array, ridge_array_1, N_init,N_fin,f_step,file_path):
     t_initial = time.time() #time where the printing of frames starts
     for k in range(N_init,N_fin,f_step):
-        plt.figure(figsize=(16,16))
+        plt.figure(figsize=(8,8))
         
         ridge_array = ridge_array_1[:,:,k].astype(int)
         
@@ -54,8 +54,8 @@ def saveframe(x_array, v_array, ridge_array_1, N_init,N_fin,f_step,file_path):
         plt.ylabel('y')
         plt.title('Step = '+str(k))
         
-        plt.xlim(-5,5)
-        plt.ylim(-5,5)
+        plt.xlim(-5.5,5.5)
+        plt.ylim(-5.5,5.5)
         plt.grid('both')
         plt.savefig(file_path+str(int(k/f_step))+'.png',dpi=100)
         plt.close()

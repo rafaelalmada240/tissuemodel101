@@ -98,12 +98,12 @@ plt.plot(np.median(F_center_array,0),'k')
 
 plt.plot(np.median(F_vertex_array,0),'r')
 
-plt.plot(F_center_array.T,'k-',alpha=0.01)
-plt.plot(F_vertex_array.T,'r-',alpha=0.01)
+plt.plot(F_center_array[:,1:].T,'k-',alpha=0.01)
+plt.plot(F_vertex_array[:,1:].T,'r-',alpha=0.01)
 plt.xscale('log')
 plt.yscale('log')
 
-plt.ylim(0.01,1)
+#plt.ylim(0.01,1)
 plt.xlim(1,coords_evo.shape[2]-1)
 plt.title('Average absolute force $|\\vec{F}|$')
 plt.legend(['Vertex','Center'])

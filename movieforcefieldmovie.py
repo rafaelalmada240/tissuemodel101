@@ -40,7 +40,7 @@ def frame_force_field_evo(center_array, force_array):
         ax.plot_surface(Xnew,Ynew,np.log10(nd.gaussian_filter(Pnew1,1)),lw=0.5,rstride = 8, cstride=8,alpha=0.5)
         ax.set(xlim=(-5,5),ylim=(-5,5),zlim=(-2,2),title='Force field (log scale)',xlabel='X',ylabel='Y',zlabel='Z')
 
-        plt.savefig('f'+str(int(i))+'.png',dpi=100)
+        plt.savefig('f'+str(int(i/fr_step))+'.png',dpi=100)
         plt.close(fig)
     plt.show()    
     return
@@ -63,7 +63,7 @@ F_center_array = abs_value(Force_center_vector)
 
 N_initial = 0 #int(input('Starting frame: '))
 N_final = len(coords_evo[0,0]) #int(input('Stopping frame: '))
-fr_step = 1 #int(input('Frame step: '))
+fr_step = 50 #int(input('Frame step: '))
 image_file = 'f'
 filename = input('Video file name (with .mp4 included): ')
 
