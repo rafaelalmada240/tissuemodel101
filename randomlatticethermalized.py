@@ -54,8 +54,7 @@ def newcoords(N):
 
 
     while (avg_f > thresh_f) and steps < n_steps:
-    
-        #print(r0)
+        
         vor = Voronoi(coords)
         vorPointRegion = vor.point_region
         vorRegions = vor.regions
@@ -74,15 +73,23 @@ def newcoords(N):
 
         avg_f = np.mean(F_center**2)**0.5
         
-        xy_hist = np.histogram2d(coords[:,0],coords[:,1],bins=200)
-        fft_hist = np.fft.fft2(nd.gaussian_filter(xy_hist[0],1))
-        fft_x = np.mean(np.abs(np.fft.fftshift(fft_hist)),axis=1)
-        fft_y = np.mean(np.abs(np.fft.fftshift(fft_hist)),axis=0)
+        steps += 1
         
-        dx = DeltaL/200
-        freq = np.linspace(0,1,100)/(2*dx)
+    print(steps)
+    print(avg_f)
+    print("done")
+    return coords
+
+
+        #xy_hist = np.histogram2d(coords[:,0],coords[:,1],bins=200)
+        #fft_hist = np.fft.fft2(nd.gaussian_filter(xy_hist[0],1))
+        #fft_x = np.mean(np.abs(np.fft.fftshift(fft_hist)),axis=1)
+        #fft_y = np.mean(np.abs(np.fft.fftshift(fft_hist)),axis=0)
         
-        fft_array[:,steps] = (fft_x-nd.gaussian_filter(fft_x,1))[100:]
+        #dx = DeltaL/200
+        #freq = np.linspace(0,1,100)/(2*dx)
+        
+        #fft_array[:,steps] = (fft_x-nd.gaussian_filter(fft_x,1))[100:]
         
         #plt.figure(figsize=(16,6))
         #plt.subplot(131)
@@ -94,10 +101,3 @@ def newcoords(N):
         #plt.plot(fft_y)
         #plt.savefig('f'+str(int(steps))+'.png',dpi=150)
         #plt.close()
-    
-    
-        steps += 1
-        
-    print(steps)
-    print(avg_f)
-    return coords
