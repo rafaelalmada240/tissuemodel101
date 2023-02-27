@@ -5,7 +5,7 @@ import pathlib
 import h5py as h5
 import matplotlib.pyplot as plt
 import randomlatticethermalized as rlt
-
+import topologicaltransitions as tpt
 ''' 
 
 Run simulations in this module
@@ -63,23 +63,30 @@ if option_1 == 1:
 
 L_max = 5
 L_min = -5  
-dt = 5*1e-3
+dt = 1e-3
 
-M = 300
+M = 100
 
 vor = Voronoi(coords)
 
 vorPointRegion = vor.point_region
 vorRegions = vor.regions
 
-DeltaL = L_max - L_min
-r0 = min(DeltaL/(5*np.sqrt(N)),0.5)
+av = []
 
+for i in range(N):
+    av.append(sppv.area_vor(vorPointRegion,vorRegions,vor.vertices,i))
+
+DeltaL = L_max - L_min
+#r0 = DeltaL/(0.66*np.sqrt(N))
+r0 = np.sqrt(np.median(av)/np.pi)
+print(DeltaL/(r0))
 #Model parameters
-K_run = 0.01#0*0.05
+K_run = 0.001#0.01#0*0.05
 A0_run = np.pi*r0**2
-G_run = 0.5+0*0.25*A0_run*K_run
-L_run = -1-0*1*K_run*A0_run**(3/2)
+#P0 = 3.0
+G_run = 0.15#10*K_run#0*0.5+0*0.25*A0_run*K_run
+L_run = -0.25#G_run*P0*K_run*np.sqrt(A0_run)#-0*1-0*1*K_run*A0_run**(3/2)
 
 
 coords_evo = np.zeros((N,2,M))
@@ -104,6 +111,8 @@ vorRidges_array[:,:,0] = vorRidges
 vorRegions_array = []
 vorRegions_array.append(vorRegions)
 
+perimeterArray = np.zeros((coords_evo.shape[0],M-1))
+areaArray = np.zeros((coords_evo.shape[0],M-1))
 #boundary = sppv.find_boundary_vertices(len(vor.vertices),vorRidges)
 
 continue_option = int(input('Continue with simulation: (y-1/n-0): '))
@@ -115,28 +124,25 @@ if continue_option == 1:
 
     for i in range(M-1):
         #Do T1 transitions and compute forces afterwards
-        
-        #print(i)
-    
-        
-        #vorRidges_array[:,:,i], coords_evo_vertex[:,:,i]
-        F_vertex = sppv.force_vtx_elastic(vorRegions, vorPointRegion, vorRidges_array[:,:,i], K_run,A0_run,G_run,L_run,coords_evo_vertex[:,:,i],0.01)
+
+        F_vertex = sppv.force_vtx_elastic(vorRegions, vorPointRegion, vorRidges_array[:,:,i], K_run,A0_run,G_run,L_run,coords_evo_vertex[:,:,i],coords_evo[:,:,i],0.01)
         Force_vertex_vector[:,:,i] = F_vertex
         
+        for elem in range(len(coords_evo)):
+            perimeterArray[elem,i] = sppv.perimeter_vor(vorPointRegion,vorRegions,coords_evo_vertex[:,:,i],elem)
+            areaArray[elem,i] = sppv.area_vor(vorPointRegion,vorRegions,coords_evo_vertex[:,:,i],elem)
         #Reflexive boundary conditions
-        #A_center = rlt.newWhere(coords_evo[:,:,i] + F_center*dt,5)
-        #coords_evo[:,:,i+1] = coords_evo[:,:,i] + A_center*F_center*dt
         
-        A_vertex = rlt.newWhere(coords_evo_vertex[:,:,i] + F_vertex*dt,5)
+        A_vertex = rlt.newWhere(coords_evo_vertex[:,:,i] + F_vertex*dt,6)
         coords_evo_vertex[:,:,i+1] = coords_evo_vertex[:,:,i] + A_vertex*F_vertex*dt
         
         #Cell center positions are the average of the cell vertex positions
         coords_evo[:,:,i+1] = sppv.cells_avg_vtx(vorRegions,vorPointRegion,coords_evo[:,:,i],coords_evo_vertex[:,:,i+1])
         
-        #vorRidges_array[:,:,i+1] = vorRidges_array[:,:,i]
+        vorRidges_array[:,:,i+1] = vorRidges_array[:,:,i]
         
         #Do topological transition T1 (hopefully works)
-        vorRidges_array[:,:,i+1], coords_evo_vertex[:,:,i+1], vorRegions, transition_counter =  sppv.T1transition(coords_evo_vertex[:,:,i+1],vorRidges_array[:,:,i],vorRegions, vorPointRegion,r0/4)
+        #vorRidges_array[:,:,i+1], coords_evo_vertex[:,:,i+1], vorRegions, transition_counter =  tpt.T1transition(coords_evo_vertex[:,:,i+1],vorRidges_array[:,:,i],vorRegions, vorPointRegion,r0/4)
         
         if transition_counter > 0:
             with open('transition_times.txt','a') as text:
@@ -146,6 +152,10 @@ if continue_option == 1:
                 text.write(str(transition_counter)+ '\n')
         
         vorRegions_array.append(vorRegions)
+    
+    #vorRegions_array = np.array(vorRegions_array)
+    
+   
             
     main_path = pathlib.Path().absolute()
     datafilesavename = input('Name of savefile: ')
@@ -157,7 +167,9 @@ if continue_option == 1:
     #data_save.create_dataset('forces_center',data=Force_center_vector)
     data_save.create_dataset('forces_vertices',data=Force_vertex_vector)
     data_save.create_dataset('Edge connections',data=vorRidges_array)
-    #data_save.create_dataset('regions',data=np.array(vorRegions_array))
+    #data_save.create_dataset('regions',data=vorRegions_array, dtype='f4')
+    data_save.create_dataset('perimeter',data=perimeterArray)
+    data_save.create_dataset('area',data=areaArray)
     #data_save.create_dataset('point_regions',data=np.array(vorPointRegion))
     data_save.create_dataset('number_of_points',data=N)
     data_save.create_dataset('time_of_simul',data=M)

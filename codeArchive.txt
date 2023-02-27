@@ -1,0 +1,432 @@
+Depricated or non-required codes. This file is mainly used as an archive of sorts for old functions that are no longer used because of better implementations, or for different models.
+
+## Depricated functions (or not necessary anymore)
+
+def path_region(regions, point_region, vertices, center):
+    #Seems to not be necessary
+    R = find_center_region(regions,point_region, center)
+    dist_mat = np.zeros((len(R),len(R)))
+    for i in range(len(R)):
+        for j in range(len(R)):
+            dist_mat[i,j] = np.sum((vertices[R[i]]-vertices[R[j]])**2)**0.5
+            
+    R_new = []
+    R_new.append(R[0])
+    
+    for i in range(len(R)-1):
+        j = np.where(np.array(R) == R_new[i])[0][0]
+        nl = []
+        for k in range(len(R)):
+            if R[k] not in R_new:
+                nl.append(k)
+        v = np.argmin(dist_mat[j,nl])
+        R_new.append(R[v])
+        
+    return R
+
+def force_vor_elastic(regions,point_region, ridges,boundary, Kp,r0, cells, vertices):
+    '''
+    
+    Calculates the force in all of the vertices according to a viscoelastic network model
+    
+    Variables:
+    
+    regions - (list) set of all the vertices that compose the different regions of the network
+    point_region - (list) set of the different regions of the network
+    ridges - (list) set of all edges in the network
+    boundary - (list) set of all boundary vertices
+    Kp - (float) elastic parameter 
+    r0 - (float) natural spring length
+    cells - array of coordinates for all cell centers of the network
+    vertices - array of coordinate positions for each vertex of the network
+    
+    Output:
+    F_C - array of all forces acting on the cell centres
+    F_V - array of all forces acting on the vertices
+    mean_dist_v - (float) average distance between vertices
+    
+    '''
+    
+    LC = len(cells)
+    LV = len(vertices)
+    F_C = [] # Vector of resulting forces acting on the centers
+    F_V = [] # Vector of resulting forces acting on the vertices
+    
+    dist_v_list = []
+    
+    
+    for c in range(LC):
+        Neigh_c = find_center_region(regions,point_region, c)
+        
+        f_c = 0.0*np.array([1.,1.])
+        for n_c in Neigh_c:
+            v_c = vertices[n_c]
+            avg_vc = 0
+            if any(v_c < 5) and any(v_c > -5):
+                r_vec_center = cells[c] - v_c
+                avg_vc += v_c/len(Neigh_c)
+                abs_rvc = norm(r_vec_center)
+                n_rvc = r_vec_center/abs_rvc
+                f_c += -Kp*(abs_rvc-r0)*n_rvc
+            #r_dev = cells[c] - avg_vc
+            #abs_dev = norm(r_dev)
+            #n_dev = r_dev/abs_dev
+            #f_c += Kp*(abs_dev)*n_dev
+        F_C.append(f_c)
+    
+    for v in range(LV):
+        f_v = 0.0*np.array([1.,1.])
+        if True:#v in boundary:
+            #f_v = 0.0*np.array([1.,1.])
+        #else:
+             
+            NeighC_V, NeighV_V = find_vertex_neighbour(regions,point_region,ridges,v)
+            
+            #Vertices in the boundary can have 2 neigbours or less, so fixing them is equivalent to fixing the boundary conditions in a certain way.
+            
+            for nc_v in NeighC_V:
+                c_v = cells[nc_v]
+                r_center_vertex = vertices[v] - c_v
+                abs_rcv = norm(r_center_vertex)
+                n_rcv = r_center_vertex/abs_rcv
+            
+                f_v += -Kp*(abs_rcv - r0)*n_rcv
+        
+            for nv_v in NeighV_V:
+                v_v = vertices[nv_v]
+                if any(v_v < 5) and any(v_v > -5):
+                    edgeV = vertices[v] - v_v
+                    abs_vv = norm(edgeV)
+                    dist_v_list.append(abs_vv)
+                    n_vv = edgeV/abs_vv
+            
+                    f_v += -Kp*(abs_vv - r0)*n_vv
+            
+        F_V.append(f_v)
+        
+    return np.array(F_C), np.array(F_V), np.mean(dist_v_list)
+
+def phi_n(l_n):
+    return l_n*np.tan(np.pi/l_n)
+
+def find_boundary_vertices(n_vertices,ridges):
+    '''
+    This function finds all vertices in the boundary of the network, under the initial assumption that vertices have 3 connections in planar graphs if they are in a bulk and 2 edges or less if they are in the boundary
+    
+    Variables:
+    
+    n_vertices - is the number of vertices in the network (the cardinality of the vertex set)
+    
+    ridges - is the set of all edges in the network
+    
+    Output:
+    
+    Bound_set - the set containing all vertices that are in the boundary, this list doesn't contain all vertices in the boundary, but it ensures all vertices in the list are in the boundary.
+    '''
+    vertex_list = []
+    
+    for k in range(n_vertices):
+        vertex_list.append(k)
+    Bound_set = []
+    Bound_set1 = []
+    Bound_set_neighbours = []
+    for v in vertex_list:
+        Neigh_V = find_vertex_neighbour_vertices(ridges,v)
+        if len(Neigh_V) < 3:
+            Bound_set.append(v)
+            Bound_set1.append(v)
+            Bound_set_neighbours.append(Neigh_V)
+        vertex_list.remove(v)
+        
+    for i in range(len(Bound_set1)):
+    #    for j in range(i+1,len(Bound_set1)):
+        neigh1 = Bound_set_neighbours[i]
+    #        neigh2 = Bound_set_neighbours[j]
+    #        vertex_new = list(set(neigh1).intersection(neigh2))
+        for b in neigh1:
+            #vertex_new:
+            if b not in Bound_set:
+                Bound_set.append(b)
+                    
+    return Bound_set
+                
+# Probably not necessary
+def remove_empty(regions):
+    for region in regions:
+        if len(region)==0:
+            regions.remove(region)
+    return regions
+
+    def force_vtx_elastic_v1(regions,point_region, ridges, K,A0,G,L, vertices):
+    
+    '''
+    
+    Calculates the force in all of the vertices according to the vertex model (finite network difference approach)
+    
+    Variables:
+    
+    regions - (list) set of all the vertices that compose the different regions of the network
+    point_region - (list) set of the different regions of the network
+    ridges - (list) set of all edges in the network
+    K, A0, G, L - (float) model parameters 
+    vertices - array of coordinate positions for each vertex of the network
+    
+    Output:
+
+    F_V - array of all forces acting on the vertices
+
+    
+    '''
+    
+    LV = len(vertices) #Number of vertices
+
+    F_V = [] # Vector of resulting forces acting on the vertices
+    
+    
+    #For vertices, well, this may be a huge mess
+    for v in range(LV):
+        
+        f_v = 0.0*np.array([1.,1.])
+        Ev = energy_vor(point_region,regions,ridges, vertices,v, K,A0,G,L)
+        NeighC_V, NeighV_V = find_vertex_neighbour(regions,point_region,ridges,v)
+        
+        for v2 in NeighV_V:
+            
+            r2 = vertices[v2]
+                    
+            #Direction
+            edgeV = r2 - vertices[v]
+            lv = norm(edgeV)
+            nv = edgeV/(lv+0.1)
+                    
+            #Calculate the local energy for the neighbouring vertices
+            Ev2 = energy_vor(point_region,regions,ridges, vertices,v2, K,A0,G,L)
+                
+            #Implement the force as an energy gradient
+            f_v += (Ev-Ev2)*nv/(lv+0.01)
+            
+        F_V.append(f_v)
+        
+    return np.array(F_V)
+
+
+        
+    
+
+def force_vtx_elastic_v2(regions,point_region, ridges, K,A0,G,L, vertices):
+    
+    '''
+    
+    Calculates the force in all of the vertices according to the vertex model (analytical expression)
+    
+    Variables:
+    
+    regions - (list) set of all the vertices that compose the different regions of the network
+    point_region - (list) set of the different regions of the network
+    ridges - (list) set of all edges in the network
+    K, A0, G, L - (float) model parameters 
+    vertices - array of coordinate positions for each vertex of the network
+    
+    Output:
+    F_V - array of all forces acting on the vertices
+    
+    '''
+    LV = len(vertices) #Number of vertices
+    F_V = [] # Vector of resulting forces acting on the vertices
+    
+    dist_v_list = []
+    
+    #For vertices, well, this may be a huge mess
+    for v in range(LV):
+        
+        f_v = force_vtx(point_region,regions,ridges,vertices,v,K,A0,G,L)#0.0*np.array([1.,1.])    
+            
+        F_V.append(f_v)
+        
+    return np.array(F_V)
+
+# Depricated, or old codes
+
+def T1_len_neigh_after_rot_v0(vertices, v_orig,neigh_min,v_min,neigh_orig, coefs1,coefs2,rvorig0, rvmin0):
+    '''
+    During a T1 transition finds the vertices for the new neighbourhood for the edge undergoing a T1 transition
+    Input:
+    vertices - set of coordinate values for each vertex
+    (v_orig,v_min) - edge in the iteration that is undergoing a T1 transition
+    neigh_min - neighbourhood of v_min
+    neigh_orig - neighbourhood of v_orig
+    
+    Output:
+    new_neighv,new_neighm - Neighbourhoods of vorig and vmin that are not vorig or vmin, respectively
+    lvv_min, lvm_min - the index of the vertices in new_neighv and new_neighm that will be swapped between the two neighbourhoods, respectively
+    '''
+    
+    #Surprisingly longer than expected, will also have to define up and down
+    
+    new_neighm = []
+    
+    f1_indexm = [] #allows to define left and right
+                
+    for v in neigh_min:
+        if v != v_orig:
+            #For this one we don't need to remove previous vertices
+            f1_v = line(coefs1[0],coefs1[1],vertices[int(v)][0])
+   
+            new_neighm.append(int(v))
+            if f1_v > vertices[int(v)][1]:
+                f1_indexm.append(1)
+            else:
+                f1_indexm.append(0)
+ 
+    #In case of both being on the same side (LR)
+    
+    if np.diff(np.array(f1_indexm))==0:
+        list_f1_len = []
+        f2_index = []
+        for v in neigh_min:
+            if v != v_orig:
+                f1_v = line(coefs1[0],coefs1[1],vertices[int(v)][0])
+
+                delta_min = vertices[int(v)][1]-f1_v
+                list_f1_len.append(delta_min)
+                
+                f2_v = line(coefs2[0],coefs2[1],vertices[int(v)][0])
+                
+                if f2_v > 0:
+                    f2_index.append(1)
+                else:
+                    f2_index.append(0)
+        
+        #A bunch of conditions
+        if np.diff(np.array(f2_index))==0:
+        #In case both of them are on the same side (UD)
+            
+            
+            if f2_index[0]== 0:
+                
+                # If they are in the same direction as v_min (relative to UD)
+               
+                lv_min = np.argmin(np.array(list_f1_len))
+                f1_indexm[lv_min]=1-f1_indexm[lv_min]
+                #if f1_indexm[lv_min]==0:
+                #    f1_indexm[lv_min]=1
+                #else:
+                #    f1_indexm[lv_min]=0
+
+            
+               
+            if f2_index[0]== 1:
+                
+                # If they are in the opposite direction as v_min (relative to UD)
+               
+                lv_min = np.argmax(np.array(list_f1_len))
+                f1_indexm[lv_min]=1-f1_indexm[lv_min]
+                #if f1_indexm[lv_min]==0:
+                #    f1_indexm[lv_min]=1
+                #else:
+                #    f1_indexm[lv_min]=0
+                
+
+        else:
+        #In case one of them is up and the other is down  
+            lv_min = np.where(np.array(f2_index)==0)[0][0]
+            f1_indexm[lv_min]=1-f1_indexm[lv_min] 
+            #if f1_indexm[lv_min]==0:
+            #    f1_indexm[lv_min]=1
+            #else:
+            #    f1_indexm[lv_min]=0
+  
+    new_neighv = []
+    f1_indexv = [] 
+
+    for v in neigh_orig:
+        if v != v_min:
+            f1_v = line(coefs1[0],coefs1[1],vertices[int(v)][0])
+            new_neighv.append(v)
+            
+            if f1_v > vertices[int(v)][1]:
+                f1_indexv.append(1)
+            else:
+                f1_indexv.append(0)
+
+    
+    #In case of weird freak configurations (both in same side LR)
+    
+    if np.diff(np.array(f1_indexv))==0:
+        list_f1_len = []
+        f2_index = []
+        for v in neigh_orig:
+            if v != v_min:
+                f1_v = line(coefs1[0],coefs1[1],vertices[int(v)][0])
+                delta_min = vertices[int(v)][1]-f1_v
+                list_f1_len.append(delta_min)
+                
+                f2_v = line(coefs2[0],coefs2[1],vertices[int(v)][0])
+                
+                if f2_v > 0:
+                    f2_index.append(1)
+                else:
+                    f2_index.append(0)
+        
+        
+        #A bunch of conditions
+        if np.diff(np.array(f2_index))==0:
+        #In case both of them are up (or down)
+            
+            #This is for v_min, for v_orig better change this to 1
+            if f2_index[0]== 1:
+               
+                # If they are in the same direction as v_orig (relative to UD)
+               
+                lv_min = np.argmin(np.array(list_f1_len))
+                f1_indexv[lv_min]=1-f1_indexv[lv_min]
+                #if f1_indexv[lv_min]==0:
+                #    f1_indexv[lv_min]=1
+                #else:
+                #    f1_indexv[lv_min]=0
+     
+            if f2_index[0]== 0:
+               
+                # If they are in the opposite direction as v_orig (relative to UD)
+               
+                lv_min = np.argmax(np.array(list_f1_len))
+                f1_indexv[lv_min]=1-f1_indexv[lv_min]
+                #if f1_indexv[lv_min]==0:
+                #    f1_indexv[lv_min]=1
+                #else:
+                #    f1_indexv[lv_min]=0 
+        else:
+        #In case one of them is up and the other is down  
+            lv_min = np.where(np.array(f2_index)==1)[0][0]
+            f1_indexv[lv_min]=1-f1_indexv[lv_min] 
+            #if f1_indexv[lv_min]==0:
+            #    f1_indexv[lv_min]=1
+            #else:
+            #    f1_indexv[lv_min]=0
+            #Maybe it won't cause any issues like this 
+        
+    
+    #Find if v_orig is on the left or the right (The only one where it will probably be alright)
+    index_vorig = 0
+    
+    f1_vorig = line(coefs1[0],coefs1[1],vertices[v_orig][0])
+    if f1_vorig < vertices[v_orig][1]:
+        index_vorig = 1
+    print(index_vorig)
+    #New vertex neighbour for v_orig will be in the same side as v_orig    
+    lvm_min = np.where(np.array(f1_indexm)==index_vorig)[0][0]
+    
+    loc_cornerv1 = 1 - index_vorig
+    
+    #New vertex neighbour to v_min will be in the opposite side to v_orig      
+    #if index_vorig == 0:
+    #    loc_cornerv1 = 1
+        
+    #if np.diff(np.array(f1_indexv))!=0:
+    lvv_min = np.where(np.array(f1_indexv)==loc_cornerv1)[0][0]
+    #else:
+    #    lvv_min = loc_cornerv1
+    print(lvm_min)
+    print(lvv_min)
+
+    return new_neighv,new_neighm, lvv_min, lvm_min

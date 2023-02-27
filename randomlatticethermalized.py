@@ -31,14 +31,11 @@ def newcoords(N):
 
     coords = np.array((x_coord,y_coord)).T
 
-
-
-
     vel_array = np.zeros((coords.shape))
 
     #Prior to simulation run a thermalization process
 
-    thresh_f = 1e-3
+    thresh_f = 1e-1
 
     avg_f = 1
 
