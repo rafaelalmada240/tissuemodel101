@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import selfpropelledparticlevoronoi as sppv
+import topologicaltransitions as tpt
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import pathlib
 import importlib
@@ -23,10 +24,12 @@ data_set = h5.File(str(main_path) + '/' + datafileloadname,'r')
 
 coords_evo = np.array(data_set['centers'])
 coords_evo_vertex = np.array(data_set['vertices'])
-#Force_center_vector = np.array(data_set['forces_center'])
+
 Force_vertex_vector = np.array(data_set['forces_vertices'])
 PerimeterArray = np.array(data_set['perimeter'])
 AreaArray = np.array(data_set['area'])
+
+AdjacencyMatrix = np.array(data_set['AdjacencyMatrix'])
 # Do some initial preprocessing
 
 P1 = PerimeterArray[:,0]
@@ -88,11 +91,15 @@ plt.plot(disp.T,'r',alpha=0.01)
 #plt.xscale('log')
 #plt.yscale('log')
 
+ymin = np.min(np.median(disp,axis=0)[1:coords_evo.shape[2]-2])
+ymax = np.max(np.median(disp,axis=0)[1:coords_evo.shape[2]-2])
+
+plt.ylim(ymin*0.99,ymax*1.01)
 plt.xlim(1,coords_evo.shape[2]-2)
 
 plt.title('Average absolute displacement $|\\Delta\\vec{r}|$')
 plt.legend(['Vertex $\\hat{X}$'])
-plt.xlabel('Time (steps)')
+plt.xlabel('Time (steps)')#Force_center_vector = np.array(data_set['forces_center'])
 
 plt.subplot(122)
 plt.plot(np.median(F_vertex_array,0),'r')
@@ -100,7 +107,10 @@ plt.plot(F_vertex_array[:,1:-1].T,'r-',alpha=0.01)
 #plt.xscale('log')
 #plt.yscale('log')
 
-#plt.ylim(0.01,100)
+ymin = np.min(np.median(F_vertex_array,0)[1:coords_evo.shape[2]-2])
+ymax = np.max(np.median(F_vertex_array,0)[1:coords_evo.shape[2]-2])
+
+plt.ylim(ymin*0.99,ymax*1.01)
 plt.xlim(1,coords_evo.shape[2]-2)
 plt.title('Average absolute force $|\\vec{F}|$')
 plt.legend(['Vertex $\\hat{X}$'])
@@ -111,5 +121,36 @@ plt.close()
 
 
 plt.show()
+
+# FIGURE 3
+eig_spectrum = []
+energy = []
+for i in range(AdjacencyMatrix.shape[2]):
+    eig_spectrum.append(np.linalg.eig(AdjacencyMatrix[:,:,i])[0])
+    energy.append(tpt.graph_energy(AdjacencyMatrix[:,:,i]))
+ 
+Nbar = AdjacencyMatrix.shape[0]   
+eig_spectrum = np.array(eig_spectrum)
+energy = np.array(energy)
+
+namefig = input('Name of first figure/ Number of figure: ')
+plt.figure(figsize=(16,6))
+plt.suptitle('Spectral properties')
+
+plt.subplot(131)
+plt.bar(np.arange(1,Nbar+1),np.mean(np.abs(eig_spectrum[:-1]),0).T,yerr = np.std(np.abs(eig_spectrum[:-1]),0).T)
+plt.title('Eigenspectrum $|\lambda|$')
+
+plt.subplot(132)
+plt.plot(np.max(np.abs(eig_spectrum[:-1]),axis=1))
+plt.xlabel('Time')
+plt.title('Spectral radius')
+
+plt.subplot(133)
+plt.plot(energy[:-1])
+plt.xlabel('Time')
+plt.title('Graph energy')
+plt.savefig('GraphSpectralProperties'+namefig+'.png',dpi=150)
+plt.close()
 
 data_set.close()

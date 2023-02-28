@@ -16,7 +16,7 @@ def norm(vec):
 #Auxiliary functions to find locations of vertices and centers
 
 def find_center_region(regions,point_region,center):
-    #Gives all the neighbours of a center in a voronoi tesselation (removes all -1 vertices)    
+    '''Gives all the neighbours of a center in a voronoi tesselation (removes all -1 vertices)'''
     point = point_region[center]
     R = regions[point]
     
@@ -28,10 +28,15 @@ def find_center_region(regions,point_region,center):
 def remove_minus(ridges):
     if isinstance(ridges,np.ndarray):
         ridges = ridges.tolist()
+        
+    index_to_remove = []
     for ridge in ridges:
         for elem in ridge:
             if elem == -1:
-                ridges.remove(ridge)
+                index_to_remove.append(ridge)
+    
+    for j in index_to_remove:
+        ridges.remove(j)
     return ridges
 
 
@@ -71,7 +76,7 @@ def find_vertex_neighbour_centers(regions, point_region,vertex):
 
         
     for i in range(len(regions)):
-#Only consider neighbouring regions that form polygons
+    #Only consider neighbouring regions that form polygons
         if vertex in regions[i]:
             list_regions.append(i) 
             loc_points = np.where(np.array(point_region)==i)
@@ -119,6 +124,8 @@ def find_center_neighbour_center(regions,point_region,center):
     List_centers.remove(center)
     return List_centers
 
+
+
 ## Functions to calculate perimeter and area terms for a given vertex
 
 def perimeter_vor(point_region,regions,vertices,i):
@@ -126,7 +133,7 @@ def perimeter_vor(point_region,regions,vertices,i):
     R = find_center_region(regions,point_region,i)
     V = vertices[R]
     P = 0
-    #Calculate the perimeter term - better write it in explicit form to avoid confusion
+    #Calculate the perimeter term
     if len(R)>2:
         for i in range(len(V)):
             P += norm(V[(i+1)%len(V)]-V[i])
@@ -154,10 +161,14 @@ def energy_vor(point_region,regions,ridges, vertices,vertex, K,A0,G,L):
     R,N_c = find_vertex_neighbour_centers(regions, point_region,vertex)
     N_v = find_vertex_neighbour_vertices(ridges,vertex)
     E = 0
+    
+    #Sum over all cells containing the vertex
     for i in N_c:
         Pi = perimeter_vor(point_region,regions,vertices, i)
         Ai = area_vor(point_region,regions,vertices, i)
         E += K/2*(Ai-A0)**2 + G/2*Pi**2
+        
+    #Sum over all adjacent vertices
     for j in N_v:
         v = vertices[j]        
         edgeV = vertices[vertex] - v
@@ -179,9 +190,6 @@ def force_vtx(point_region, regions, ridges, vertices, vertex, K, A0, G, L):
         R_i = regions[R[i]]
         if len(R_i)>2:
             S = list(set(R_i).intersection(N_v))
-            
-            #print('R_i - '+str(R_i)+'\n')
-            #print('N_v -'+str(N_v)+'\n')
         
             if len(S)>1:
         
@@ -199,12 +207,6 @@ def force_vtx(point_region, regions, ridges, vertices, vertex, K, A0, G, L):
                 print(Pi)
                 print(Ai)
                 F += K/2*(Ai-A0)*n_a - float(G*Pi+L/2)*n_p
-    #for j in N_v:
-    #    v = vertices[j]        
-    #    edgeV = vertices[vertex] - v
-    #    lj = norm(edgeV)
-    #    nj = edgeV/lj    
-    #    F = L*nj
         
     return F
 ## Different force models 
@@ -276,20 +278,15 @@ def force_vtx_elastic(regions,point_region, ridges, K,A0,G,L, vertices,centers, 
         
         f_v = 0.0*np.array([1.,1.])
         Ev = energy_vor(point_region,regions,ridges, old_vertices,v, K,A0,G,L)
-        #r1 = np.random.rand()
-        #dr1 = 1 if r1 > 0.5 else -1
-        
-        #r2 = np.random.rand()
-        #dr2 = 1 if r2 > 0.5 else -1
         
         n1 = np.array([1,0])
         n2 = np.array([0,1])
         
-        new_vertices1x[v] = new_vertices1x[v] - h*n1#*dr1
-        new_vertices2x[v] = new_vertices2x[v] + h*n1#*dr2
+        new_vertices1x[v] = new_vertices1x[v] - h*n1
+        new_vertices2x[v] = new_vertices2x[v] + h*n1
         
-        new_vertices1y[v] = new_vertices1y[v] - h*n2#*dr1
-        new_vertices2y[v] = new_vertices2y[v] + h*n2#*dr2
+        new_vertices1y[v] = new_vertices1y[v] - h*n2
+        new_vertices2y[v] = new_vertices2y[v] + h*n2
         
         Ev1x = energy_vor(point_region,regions,ridges, new_vertices1x,v, K,A0,G,L)
         Ev2x = energy_vor(point_region,regions,ridges, new_vertices2x,v, K,A0,G,L)
@@ -303,7 +300,6 @@ def force_vtx_elastic(regions,point_region, ridges, K,A0,G,L, vertices,centers, 
         f_v = -(dEdx*n1 + dEdy*n2)
         
         #Maybe include a regularizing force acting on the cells
-        #Maybe it will work, but I don't know
         
         new_vertices = np.array(old_vertices)
         
@@ -332,6 +328,8 @@ def cells_avg_vtx(regions,point_region,cells,vertices):
         
     return cells
             
+            
+#Depricated, no longer in use
 def force_vtx_elastic_v2(regions,point_region, ridges, K,A0,G,L, vertices):
     
     '''
@@ -358,7 +356,7 @@ def force_vtx_elastic_v2(regions,point_region, ridges, K,A0,G,L, vertices):
     #For vertices, well, this may be a huge mess
     for v in range(LV):
         
-        f_v = force_vtx(point_region,regions,ridges,vertices,v,K,A0,G,L)#0.0*np.array([1.,1.])    
+        f_v = force_vtx(point_region,regions,ridges,vertices,v,K,A0,G,L)   
             
         F_V.append(f_v)
         

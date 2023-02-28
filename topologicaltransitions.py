@@ -1,6 +1,28 @@
 import numpy as np
 import selfpropelledparticlevoronoi as sppv
 
+
+## Topological properties
+
+def adjacency_matrix(n_vertices, ridges):
+    '''
+    Calculates the adjacency matrix of the network
+    '''
+    
+    ridges = list(ridges)
+    A_ij = np.zeros((n_vertices,n_vertices))
+    for ridge in ridges:
+        if (ridge[0]!= -1) and (ridge[1]!= -1):
+            A_ij[int(ridge[0]),int(ridge[1])] = 1
+            A_ij[int(ridge[1]),int(ridge[0])] = 1
+        
+    return A_ij
+
+def graph_energy(Amatrix):
+    eig_spectrum = np.linalg.eig(Amatrix)[0]
+    return np.sum(np.abs(eig_spectrum))
+    
+
 ## T1 Transitions
 
 def line(a,b,x):
@@ -139,6 +161,12 @@ def T1_len_neigh_after_rot(vertices, v_orig,neigh_min,v_min,neigh_orig, coefs1,c
     return neighv_ind,neighm_ind, lvv_min, lvm_min
 
 def T1_change_edges(ridges,vertices_neigh, vertices_neigh_min,i,v_min):
+    
+    '''
+    After the change in neighbours for each vertex in the edge that was rearranged, remove the old edges from the edge set and include the new edges
+    '''
+    
+    
     loc_ridges = np.where(ridges == i)[0]
     
     #print(loc_ridges)
