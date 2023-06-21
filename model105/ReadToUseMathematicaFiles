@@ -1,0 +1,8 @@
+Order to use Mathematica Files
+
+AnalyticalExpressionOrderParameterWoundClosure - to derive the mean field dimensionless expression
+RootExploration1 - To visualize the roots in function of different parameters
+RootExploration2 - An attempt to analytically explore the interplay of actin-tension and tissue fluidity in wound closure
+StabilityAnalysisSimplifiedModel - Visualizes phase portraits of a simplified version of the model to recover some of the dynamics to be expected
+StabilityAnalysisOffE - Explores the original not Taylor Expanded model in order to recover the dynamical properties of the system, what kind of bifurcations are present in the system
+SusceptibilityAndMeanFieldVariables - Some quantities like heat capacity and susceptibility as well as critical exponents are computed to justify the mean field approach 
