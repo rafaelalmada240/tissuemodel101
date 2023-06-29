@@ -6,3 +6,5 @@ In folder model101, I have the code to implement the vertex model in a random ti
 In folder model102, I have the code to implement the vertex model in a random tissue with single cell wound to a finite gradient method, with equal equilibrium area for all cells.
 
 In folder model103, I have the code to implement the vertex model in a random tissue with wound of variable size to a finite gradient method, with variable equilibrium area.
+
+I will probably need to create a new repository, since this one is just to ensure I have all different versions of the code
