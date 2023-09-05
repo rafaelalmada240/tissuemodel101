@@ -1,0 +1,79 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+New stuff
+1. Data files
+    None
+.......................................................................................................................
+2. In Testing individual codes.ipynb
+2.1 Added section to select and highlight a section of the boundary for shear displacement
+2.2 Added section to test new T1 transition algorithm in a toy network
+.......................................................................................................................
+3. In generatetissue.py
+3.1 Added code to increase wound size by removing cell points before Voronoi tesselation
+.......................................................................................................................
+4. In  makefiguresandgraphics.py
+4.1 imported new module findconnections.py as fc
+4.2 norm is now in fc instead of selfpropelledparticlevoronoi.py
+.......................................................................................................................
+5. In makenetworkmovie.py
+5.1 open figure before starting for cycle
+5.2 Changed figure slightly by increasing dpi from 100 to 150 and decreasing ROI for (-5.5:5.5) to (-5:5) (both x and y directions) 
+5.3 filepath is now default to 'f' instead of needing user input
+5.4 Removed some comented lines
+.......................................................................................................................
+6. In randomlatticethermalized.py
+6.1 imported fc
+6.2 added function
+    thermalize(regions, point_region,cells,vel,r0)
+.......................................................................................................................
+7. In runsimulation.py
+7.1 imported fc
+7.2 DOes not output an histogram now
+7.3 modified some simulation parameters 
+7.4 Some functions previously on sppv are now in fc
+7.5 Changes to shear section of code mainly with regards to what is done on the relaxation step
+.......................................................................................................................
+8. In selfpropelledparticlevoronoi.py
+8.1 Removed functions (probably ported to fc)
+    norm(vec)
+    vertices_in_bound(vertices,L)
+    find_center_region(regions,point_region,center)
+    remove_minus(ridges)
+    find_vertex_neighbour_vertices(ridges,vertex)
+    find_vertex_neighbour_centers(regions, point_region,vertex)
+    find_vertex_neighbour(regions, point_region, ridges,vertex)
+    find_center_neighbour_center(regions,point_region,center)
+    find_boundary_vertices(n_vertices,ridges)
+    find_wound_boundary(regions, point_region, wound_loc)
+    thermalize(regions, point_region,cells,vel,r0)
+8.2 Most of the existing functions now call auxilliary functions from fc
+8.3 In energy_vor, now does not iterate on vertices in boundaries (the wound boundary vertices are iterated in energy_vor_wound)
+8.4 force_vtx_finite_grad now also gets boundary_tissue as input
+8.5 Now A0 is a vector
+8.6 force_vtx_elastic_shear_rest has some changes
+8.7 Added function
+    smooth_boundary(regions,point_region, ridges, K,A0,G,L, vertices, centers,h)
+.......................................................................................................................
+9. In weightedgraphanalysis.py
+9.1 Import fc (and all the changes associated with it)
+.......................................................................................................................
+10. In topologicaltransitions.py
+10.1 Import fc (and all the changes associated with it)
+10.2 from scipy.spatial import Voronoi
+10.3 change name from T1transition_old to T1transition1 and T1transition to T1transition2
+.......................................................................................................................
+11. Removed files
+    ForceExpression.nb (not checked yet in model101)
+    WoundArea2.xlsx
+    codeArchive.txt
+    woundareaGL.xlsx
+.......................................................................................................................
+12. Added files
+    AnalyticalExpressionOrderParameterWoundClosure.nb
+    findconnections.py
+    shearanalysis.py
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Things not changed
+1. movieforcefieldmovie.py
+2. movies_from_plots.py
+
