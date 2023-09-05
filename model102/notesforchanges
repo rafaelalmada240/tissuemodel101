@@ -1,0 +1,68 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+New stuff
+1. In Testing individual codes.ipynb
+1.1 - New module imported (weightedgraphanalysis or wga)
+1.2 - Added 
+    voronoi_plot_2d(vor)
+    for region in vor.regions:
+        if not -1 in region:
+            polygon = [vor.vertices[i] for i in region if sppv.norm(vor.vertices[i]) < np.sqrt(2)*5]
+            plt.fill(*zip(*polygon))
+
+1.3 - Has a section to look at spectra of weight matrix and adjacency matrix  visualization
+1.4 - Visualizes tissue and wound boundary
+.......................................................................................................................
+2. New Excel Files - WoundArea2 and woundareaGL
+.......................................................................................................................
+3. In makefiguresandgraphics.py
+3.1 - New module imported (wga)
+3.2 - New variable (WoundArea) added to dataset
+3.3 - Change histogram such that the n_bins = n_data^0.5 (n_bins - number of bins; n_data - number of data points)
+3.4 - Absolute average vertex displacement and average force magnitude now in log-scale in the y-axis
+3.5 - New figure for wound area over time generated as output
+.......................................................................................................................
+4. In makenetworkmovie.py 
+4.1 Import module from scipy.spatial import Voronoi, voronoi_plot_2d
+    V = Voronoi(x_array[:,:,k])
+    voronoi_plot_2d(V,show_vertices=False,show_points=False,line_alpha=0.1)
+.......................................................................................................................
+5. In selfpropelledparticlevoronoi.py
+5.1 Added new functions
+Define Boundary functions
+    vertices_in_bound(vertices,L)
+    find_boundary_vertices(n_vertices,ridges)
+    find_wound_boundary(regions, point_region, wound_loc)
+Dynamic Vertex Model functions    
+    energy_vor_wound(point_region,regions,ridges, vertices,vertex, K,A0,G,L,wloc, bound_wound)
+    force_vtx_finite_grad(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h)
+    force_vtx_finite_grad_wound(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h,wloc, bound_wound)
+    force_vtx_elastic_shear(regions,point_region, ridges, K,A0,G,L, vertices,centers, magF, h)
+    force_vtx_elastic_shear_rest(regions,point_region, ridges, K,A0,G,L, vertices,centers, h)
+    force_vtx_elastic_wound(regions,point_region, ridges, K,A0,G,L, vertices,centers, wloc,h)
+5.2 Removed 
+    force_vtx_elastic_v2(regions,point_region, ridges, K,A0,G,L, vertices)
+5.3 force_vtx_elastic modified (due to new function force_vtx_finite_grad)
+.......................................................................................................................
+6. In topologicaltransitions.py
+6.1 Removed 
+    adjacency_matrix(n_vertices, ridges)
+    graph_energy(Amatrix)
+6.2 T1transition modified (change in algorithm)
+.......................................................................................................................
+7. Removed files
+    Self-Propelled Voronoi Model.ipynb
+    runspringnetsimul
+.......................................................................................................................
+8. Added files
+    generatetissue.py
+    runsimulation.py
+    weightedgraphanalysis.py
+    
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Things not changed
+1. movieforcefieldmovie.py - Not changed
+2. movies_from_plots.py - Not changed
+3. randomlatticethermalized.py - Not changed
+
+
+
