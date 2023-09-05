@@ -1,0 +1,37 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+New stuff
+1. Data files
+      codeArchive.txt     
+.......................................................................................................................
+2. In runsimulation.py
+2.1 Change in code as now Lw is an independent variable from L
+.......................................................................................................................
+3. In selfpropelledparticlevoronoi.py
+3.1 Change in code as now Lw is an independent variable from L
+.......................................................................................................................
+4. Removed files
+      Texting individual codes.ipynb
+.......................................................................................................................
+5. Added files
+      ForceExpression.nb (added again)
+      MeanFieldPartitionFunctio.nb
+      RootExploration1.nb
+      RootExploration2.nb
+      ShearAnalysis.nb
+      StabilityAnalysisOfE.nb
+      StabilityAnalysisSimplifiedModel.nb
+      SusceptibilityAndMeanFieldVariables.nb
+      opensimuloutput.py
+      runwoundsimulalot.py
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Things not changed
+1. findconnections.py
+2. generatetissue.py
+3. makefiguresandgraphics.py
+4. makenetworkmovie.py
+5. movieforcefieldmovie.py
+6. movies_from_plots.py
+7. randomlatticethermalized.py
+8. shearanalysis.py
+9. topologicaltransitions.py
+10. weightedgraphanalysis.py
