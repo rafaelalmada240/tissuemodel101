@@ -1,0 +1,65 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+New stuff
+1. Data files
+    ReadToUseMathematicaFiles
+.......................................................................................................................
+2. In GeneratedTissueVisualization.ipynb
+2.1 Added a section to open tissue in new file
+.......................................................................................................................
+3. In  AnalyzeClosureLambdaBeta.ipynb
+3.1 Added a section to see more parameter diagrams
+.......................................................................................................................
+4. In maketissuenetwork.py
+4.1 Remove a section and changed some lines to solve some issues in generating large wounds
+.......................................................................................................................
+5. In selfpropelledparticlevoronoi.py
+5.1 Remove functions
+    L1_dist(vec)
+    energy_vor_wound(point_region,regions,ridges, vertices,vertex, K,A0,G,L,Lw,wloc, bound_wound)
+    force_vtx(point_region, regions, ridges, vertices, vertex, K, A0, G, L)
+    force_vtx_finite_grad(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h,boundary_tissue)
+    force_vtx_finite_grad_wound(point_region, regions, ridges, vertices, vertex, K, A0, G, L, Lw,h,wloc, bound_wound)
+    force_vtx_elastic_shear(regions,point_region, ridges, K,A0,G,L, vertices,centers, magF, h, boundary_tissue, bound_up, bound_down)
+    force_vtx_elastic_shear_rest(regions,point_region, ridges, K,A0,G,L, vertices,centers, h,boundary_tissue, bound_down)
+    force_vtx_elastic_wound(regions,point_region, ridges, K,A0,G,L,Lw,vertices,centers, wloc,h)
+    smooth_boundary(regions,point_region, ridges, K,A0,G,L, vertices, centers,h)
+    
+5.2 Add functions
+    perimeters_vor(point_region,regions,vertices,ridges,list_i)
+    areas_vor(point_region,regions,vertices,ridges,list_i,to_print = False)
+    energy_vor_v2(point_region,regions,ridges, vertices,vertex, K,A0,G,L,boundary_tissue,Lw,wloc, bound_wound)
+    force_vtx_finite_gradv2(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h,boundary_tissue, Lw,wloc, bound_wound)
+.......................................................................................................................
+6. In topologicaltransitions.py
+6.1 Added a few lines of comment   
+.......................................................................................................................
+7. Removed files
+    HisteresisExploration.ipynb
+    Testing individual codes.ipynb 
+    VertexModelExample.ipynb
+    RunWoundHealSim.cpp
+    multiarray.cpp
+    makenetworkmovie.py
+    movieforcefieldmovie.py
+    movies_from_plots.py
+    weightedgraphanalysis
+.......................................................................................................................
+8. Added files
+    AnalyzeClosureLambdaBeta1Wound.ipynb
+    Run1WoundHeal.py
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Things not changed
+1. RootExploration1.nb*
+2. RootExploration2.nb*
+3. StabilityAnalysisSimplifiedModel.nb*
+4. ZerothOrderSolution.nb*
+5. RunWoundHealSim.py
+6. findconnections.py
+7. generatetissue.py
+8. opensimuloutput.py
+9. randomlatticethermalized.py
+10. runsimulation.py
+11. runwoundsimulalot.py
+12. shearanalysis
+
+*Can't read Mathematica Files on Github
