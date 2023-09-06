@@ -3,9 +3,15 @@ New stuff
 1. Data files
     ReadToUseMathematicaFiles
 .......................................................................................................................
-2. In 
+2. In runwoundsimulalot.py
+2.1 Minor comments and introduction of topological rearrangements in the network
 .......................................................................................................................
-3. In 
+3. In selfpropelledparticlevoronoi.py
+3.1 Added functions
+    L1_dist(vec)
+    adj_mat(R,ridges)
+    flatten(l)
+    rearrange(n, bin_mat,to_print = False)
 .......................................................................................................................
 4. Removed files
     None
@@ -23,3 +29,15 @@ New stuff
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Things not changed
+1. findconnections.py
+2. generatetissue.py
+3. makefiguresandgraphics.py
+4. makenetworkmovie.py
+5. movieforcefieldmovie.py
+6. movies_from_plots.py
+7. opensimuloutput.py
+8. randomlatticethermalized.py
+9. runsimulation.py
+10. shearanalysis
+11. topologicaltransitions.py
+12. weightedgraphanalysis.py
