@@ -2,6 +2,9 @@ import numpy as np
 import findconnections as fc
 import networkx as nx
 from time import time
+from multiprocessing import Pool
+
+
 
 
 
@@ -15,6 +18,8 @@ from time import time
 
 '''
 
+
+#Maybe needs to declare jit before implementation
 ## Functions to calculate perimeter and area terms for a given vertex
 
 def adj_mat(R,ridges):
@@ -29,7 +34,7 @@ def adj_mat(R,ridges):
                 bin_mat[loc_i,loc_j] = 1
     
     return bin_mat
-    
+
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
@@ -50,7 +55,6 @@ def rearrange(n, bin_mat,to_print = False):
     return arr_new
 
 
-
 def perimeter_vor(point_region,regions,vertices,ridges,i):
 
     R = fc.find_center_region(regions,point_region,i)
@@ -68,7 +72,6 @@ def perimeter_vor(point_region,regions,vertices,ridges,i):
     else:
         P = 0
     return P
-
 
 def area_vor(point_region,regions,vertices,ridges,i,to_print = False):
 
@@ -91,6 +94,7 @@ def area_vor(point_region,regions,vertices,ridges,i,to_print = False):
                 
     return 1/2*fc.norm(A1)
 
+
 def perimeters_vor(point_region,regions,vertices,ridges,list_i):
 
     Rlist = [fc.find_center_region(regions,point_region,i) for i in list_i]
@@ -108,6 +112,7 @@ def perimeters_vor(point_region,regions,vertices,ridges,list_i):
             P = 0
         Plist.append(P)
     return Plist
+
 
 def areas_vor(point_region,regions,vertices,ridges,list_i,to_print = False):
     Rlist = [fc.find_center_region(regions,point_region,i) for i in list_i]
@@ -127,7 +132,8 @@ def areas_vor(point_region,regions,vertices,ridges,list_i,to_print = False):
         Alist.append(1/2*fc.norm(A1))
     return Alist
             
-        
+    
+ 
 def nsides_vor(point_region,regions,i):
 
     R = fc.find_center_region(regions,point_region,i)
@@ -184,6 +190,8 @@ def energy_vor_v1(point_region,regions,ridges, vertices,vertex, K,A0,G,L,boundar
         
     P = perimeters_vor(point_region,regions,vertices,ridges, Ncw)
     A = areas_vor(point_region,regions,vertices, ridges, Ncw)
+    
+    
     A0c = [A0[i] for i in Ncw]
     ESum = np.array([K/2*(A[i]-A0c[i])**2 + G/2*P[i]**2 for i in range(len(A))])
     
@@ -203,6 +211,7 @@ def displacement_vertex(vertices, vertex, h,dir,pos):
     vertices[vertex] = vertices[vertex]+h*dir*pos
     return vertices
 
+
 def force_vtx_finite_gradv2(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h,boundary_tissue, Lw,wloc, bound_wound):
         
     f_v = 0.0*np.array([1.,1.])
@@ -210,10 +219,10 @@ def force_vtx_finite_gradv2(point_region, regions, ridges, vertices, vertex, K, 
     n1 = np.array([1,0])
     n2 = np.array([0,1])
     
-    new_vertices1x = displacement_vertex(vertices,vertex,h,n1,-1)
-    new_vertices2x = displacement_vertex(vertices,vertex,h,n1,1)
-    new_vertices1y = displacement_vertex(vertices,vertex,h,n2,-1)
-    new_vertices2y = displacement_vertex(vertices,vertex,h,n2,1)
+    new_vertices1x = displacement_vertex(np.array(vertices),vertex,h,n1,-1)
+    new_vertices2x = displacement_vertex(np.array(vertices),vertex,h,n1,1)
+    new_vertices1y = displacement_vertex(np.array(vertices),vertex,h,n2,-1)
+    new_vertices2y = displacement_vertex(np.array(vertices),vertex,h,n2,1)
         
     Ev1x = energy_vor_v2(point_region,regions,ridges, new_vertices1x,vertex, K,A0,G,L,boundary_tissue,Lw,wloc, bound_wound)
     Ev2x = energy_vor_v2(point_region,regions,ridges, new_vertices2x,vertex, K,A0,G,L,boundary_tissue,Lw,wloc, bound_wound)
@@ -226,6 +235,7 @@ def force_vtx_finite_gradv2(point_region, regions, ridges, vertices, vertex, K, 
     f_v = -(dEdx*n1 + dEdy*n2)
     
     return f_v
+
 
 def force_vtx_finite_gradv1(point_region, regions, ridges, vertices, vertex, K, A0, G, L,h,boundary_tissue):
         
@@ -311,6 +321,7 @@ def force_vtx_elastic_wound(regions,point_region, ridges, K,A0,G,L,Lw,vertices,c
         F_V.append(f_v)
         
     return np.array(F_V)
+
 
 
 def force_vtx_elastic(regions,point_region, ridges, K,A0,G,L,vertices,centers,h, boundary_tissue):

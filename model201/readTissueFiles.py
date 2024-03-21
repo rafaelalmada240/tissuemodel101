@@ -192,7 +192,7 @@ def simpleOutputTissues(foldername,par,Lists,filename="woundinfo"):
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
     
-    with open(foldername+'/simple_output'+'/'+filename+'A'+str(Aw0.round(3))+'G'+str(G)+'L-'+str(lr)+'Lw-'+str(lw)+'Ncells'+str(Nc)+'.txt','a') as text:
+    with open(foldername+'/simple_output'+'/'+filename+'A'+str(round(Aw0,3))+'G'+str(G)+'L-'+str(round(lr,2))+'Lw-'+str(round(lw,2))+'Ncells'+str(Nc)+'.txt','a') as text:
         for i in range(len(perimeterL)):
                     
             text.write(str(i))
@@ -225,7 +225,7 @@ def movieOutputTissues(foldername,par,Lists):
     #Create folder 
     current_directory = os.getcwd()
     
-    moviefolder = foldername+'/movie_output/l'+str(int(lr.round(2))*100)+'lw'+str(int(lw.round(2))*100)
+    moviefolder = foldername+'/movie_output/l'+str(int(round(lr,2))*100)+'lw'+str(int(round(lw,2))*100)
     final_directory = os.path.join(current_directory,moviefolder)
     if not os.path.exists(final_directory):
         os.makedirs(final_directory)
@@ -305,7 +305,7 @@ def saveGeneratedNetwork(coords, size_of_wound,vorPointRegion,vorRegions,vorVert
 
             
 
-def openTissueSimpleFile(Tsim, wound_sizes,tissues_list,LW1_list,L1_list,Nc,foldername):
+def openTissueSimpleFile(Tsim, wound_sizes,tissues_list,G,LW1_list,L1_list,Nc,foldername):
 
     a1_array1 = np.zeros((len(tissues_list),len(L1_list),len(LW1_list),Tsim))
     p1_array1 = np.zeros((len(tissues_list),len(L1_list),len(LW1_list),Tsim))
@@ -321,13 +321,13 @@ def openTissueSimpleFile(Tsim, wound_sizes,tissues_list,LW1_list,L1_list,Nc,fold
         t_list = []
         t1_list = []
         opt_list = []
-        filename_str = foldername + str(tissues_list[tissue])+'/woundinfoA'
+        filename_str = foldername + str(tissues_list[tissue])+'/simple_output/woundinfoA'
         for lr in L1_list:
             for lw in LW1_list:
                 opt_ = []
                 p1 = []
                 a1 = []
-                with open(filename_str+wound_sizes[tissue]+'G1L-'+str(lr)+'Lw-'+str(lw)+'Ncells'+str(Nc)+'.txt','r') as text:
+                with open(filename_str+wound_sizes[tissue]+'G'+str(G)+'L-'+str(lr)+'Lw-'+str(lw)+'Ncells'+str(Nc)+'.txt','r') as text:
                     for line in text:
                         # print(line)  
                         opt_.append(float(line.replace("\n","").split(' ')[2]))

@@ -6,6 +6,7 @@ import readTissueFiles as rTF
 import time
 
 
+
 ''' 
 Run simulations in this module for a prebuilt tissue network 
 (that is we generate the tissue in a separate code, and we run the simulations in this code)
@@ -25,45 +26,23 @@ epsilont = float(input("Enter the temporal resolution you want (float): "))
 K_run = float(input("Enter K: "))
 G_run = float(input("Enter G: "))
 
-list_plw = bool(int(input('Do you want a list of p0 and lw?: ')))
-if list_plw:
-    p0_min = float(input("Lower bound p0: "))
-    p0_max = float(input("Upper bound p0: "))
-    p0_Nbin = int(input("p0 Number of bins: "))
+p0_min = float(input("Lower bound p0: "))
+p0_max = float(input("Upper bound p0: "))
+p0_Nbin = int(input("p0 Number of bins: "))
 
-    lw_min = float(input("Lower bound lw: "))
-    lw_max = float(input("Upper bound lw: "))
-    lw_Nbin = int(input("lw Number of bins: "))
+# lw_min = float(input("Lower bound lw: "))
+# lw_max = float(input("Upper bound lw: "))
+# lw_Nbin = int(input("lw Number of bins: "))
 
-    #To make a list of Ls and Lws (dimensionless)
-    L_List =  list(np.linspace(p0_min,p0_max,p0_Nbin))
-    print("bin resolution p0")
-    print(float((p0_max-p0_min)/(p0_Nbin-1)))
+#To make a list of Ls and Lws (dimensionless)
+L_List =  list(np.linspace(p0_min,p0_max,p0_Nbin))
+print("bin resolution p0")
+print(float((p0_max-p0_min)/(p0_Nbin-1)))
 
 
-    Lw_List = list(np.linspace(lw_min,lw_max,lw_Nbin))
-    print("bin resolution lw")
-    print(float((lw_max-lw_min)/(lw_Nbin-1)))
-    
-else:
-    p0_min = float(input("p0: "))
-    p0_max = p0_min
-    p0_Nbin = 2
-
-    lw_min = float(input("lw: "))
-    lw_max = lw_min
-    lw_Nbin = 2
-
-    #To make a list of Ls and Lws (dimensionless)
-    L_List =  [p0_min]
-    print("bin resolution p0")
-    print(float((p0_max-p0_min)/(p0_Nbin-1)))
-
-
-    Lw_List = [lw_min]
-    print("bin resolution lw")
-    print(float((lw_max-lw_min)/(lw_Nbin-1)))
-    
+# Lw_List = list(np.linspace(lw_min,lw_max,lw_Nbin))
+# print("bin resolution lw")
+# print(float((lw_max-lw_min)/(lw_Nbin-1)))
 
 L_max = 5
 L_min = -5  
@@ -80,7 +59,6 @@ woundsize = int(input('Enter wound size: '))
 # Opening files in respective folders - probably use a function that turns this into a dictionary:
 ##########################################################################################################
 bigfoldername = input('Enter name of big folder where the tissue folders are: ')
-
 for tissue_n in tissues:
     
     tme = time.time()
@@ -137,77 +115,74 @@ for tissue_n in tissues:
     areaWound0 = sppv.area_vor(vorPointRegion,vorRegions,vertices,vorRidges,wloc)
 
 #####################################################################################################################
-    i_final = 0
     for lr in L_List:
         # Run simulations
-        for lw in Lw_List:
-            Lr = lr*G_run*2*K_run*np.median(av)**(1/2)
-            Lw = (lw-lr)*K_run*np.median(av)**(3/2)
-            
-            i = 0
-            transitionsList = []
-            periWList = []
-            areaWList= []
-            total_transitions = 0
-            areaWound = areaWound0
-            coords_evo = coords
-            coords_evo_vertex = vertices
-            
-            list_coords = []
-            list_vertex = []
-            list_points = []
-            list_regions = []
-            list_edges = []
-            list_boundaries = []
-            list_wloc = []
+        # for lw in Lw_List:
+        Lr = lr*G_run*2*K_run*areaWound0**(1/2)
+        # Lw = (lw-lr)*K_run*areaWound0**(3/2)
+        
+        i = 0
+        transitionsList = []
+        periWList = []
+        areaWList= []
+        total_transitions = 0
+        areaWound = areaWound0
+        coords_evo = coords
+        coords_evo_vertex = vertices
+        
+        list_coords = []
+        list_vertex = []
+        list_points = []
+        list_regions = []
+        list_edges = []
+        list_boundaries = []
+        list_wloc = []
 
-            while (i < M) and ((areaWound>= areaWound0/4) and (areaWound<= 4*areaWound0)):
-                
-                #Compute the area and perimeter of the wound
-                perimeterWound = sppv.perimeter_vor(vorPointRegion,vorRegions,coords_evo_vertex,vorRidges,wloc)
-                areaWound = sppv.area_vor(vorPointRegion,vorRegions,coords_evo_vertex,vorRidges,wloc)
-                
-                #Compute forces
-                F_vertex = sppv.force_vtx_elastic_wound(vorRegions, vorPointRegion, vorRidges, K_run,A0_run,G_run,Lr,Lw,coords_evo_vertex,coords_evo,wloc,h,Boundaries[0])
-                # print(np.mean(F_vertex,0))    
-                #Reflexive boundary conditions
-                A_vertex = rlt.newWhere(coords_evo_vertex + mu*F_vertex*dt,6)
-                coords_evo_vertex = coords_evo_vertex + mu*A_vertex*F_vertex*dt
-                
+        while (i < M) and ((areaWound>= areaWound0/4) and (areaWound<= 4*areaWound0)):
             
-                #Cell center positions are the average of the cell vertex positions
-                coords_evo = sppv.cells_avg_vtx(vorRegions,vorPointRegion,np.array(coords_evo),np.array(coords_evo_vertex))
-                
-                #Do topological rearrangements
-                transition_counter = 0
-                if UseT1:
-                    vorRidges, coords_evo_vertex, vorRegions, transition_counter =  tpt.T1transition2(np.array(coords_evo_vertex),np.array(vorRidges),vorRegions, vorPointRegion,0.01*r0)
-                    
-                i = i + 1
-                total_transitions += transition_counter 
-                
-                #Store values in list to be saved later
-                periWList.append(perimeterWound)
-                areaWList.append(areaWound)
-                transitionsList.append(transition_counter)
-                
-                list_coords.append(coords_evo)
-                list_vertex.append(coords_evo_vertex)
-                list_edges.append(vorRidges)
-                list_points.append(vorPointRegion)
-                list_regions.append(vorRegions)
-                list_boundaries.append(Boundaries)
-                list_wloc.append(wloc)
+            #Compute the area and perimeter of the wound
+            perimeterAvg = np.median(sppv.perimeters_vor(vorPointRegion,vorRegions,coords_evo_vertex,vorRidges,vorPointRegion))
+            areaAvg = np.median(sppv.areas_vor(vorPointRegion,vorRegions,coords_evo_vertex,vorRidges,vorPointRegion))
             
+            #Compute forces
+            F_vertex = sppv.force_vtx_elastic(vorRegions, vorPointRegion, vorRidges, K_run,A0_run,G_run,Lr,coords_evo_vertex,coords_evo,h,Boundaries[0])
+            # print(np.mean(F_vertex,0))    
+            #Reflexive boundary conditions
+            A_vertex = rlt.newWhere(coords_evo_vertex + mu*F_vertex*dt,6)
+            coords_evo_vertex = coords_evo_vertex + mu*A_vertex*F_vertex*dt
+            
+        
+            #Cell center positions are the average of the cell vertex positions
+            coords_evo = sppv.cells_avg_vtx(vorRegions,vorPointRegion,np.array(coords_evo),np.array(coords_evo_vertex))
+            
+            #Do topological rearrangements
+            transition_counter = 0
+            if UseT1:
+                vorRidges, coords_evo_vertex, vorRegions, transition_counter =  tpt.T1transition2(np.array(coords_evo_vertex),np.array(vorRidges),vorRegions, vorPointRegion,0.01*r0)
+                
+            i = i + 1
+            total_transitions += transition_counter 
+            
+            #Store values in list to be saved later
+            periWList.append(perimeterAvg)
+            areaWList.append(areaAvg)
+            transitionsList.append(transition_counter)
+            
+            list_coords.append(coords_evo)
+            list_vertex.append(coords_evo_vertex)
+            list_edges.append(vorRidges)
+            list_points.append(vorPointRegion)
+            list_regions.append(vorRegions)
+            list_boundaries.append(Boundaries)
+            list_wloc.append(wloc)
+        
             
             #Output of simulations for analysis
             
             if simple_output: 
-                rTF.simpleOutputTissues(foldername,[areaWound0,G_run,lr,lw,N],[periWList,areaWList,transitionsList])
+                rTF.simpleOutputTissues(foldername,[areaWound0,G_run,lr,0,N],[periWList,areaWList,transitionsList])
             else:
-                rTF.movieOutputTissues(foldername,[len(list_wloc),lr,lw],[list_coords,list_points,list_regions,list_vertex,list_edges,list_boundaries,list_wloc])
-                
-            i_final += i
+                rTF.movieOutputTissues(foldername,[len(list_wloc),lr,0],[list_coords,list_points,list_regions,list_vertex,list_edges,list_boundaries,list_wloc])
     #################################################################################################################################################################   
             
     #Log of simulations
@@ -229,13 +204,10 @@ for tissue_n in tissues:
         log.write(str(tf)+'\n')
         log.write('Total number of iterations - ')
         log.write(' ')
-        log.write(str(i_final)+'\n')
+        log.write(str(i)+'\n')
         log.write('Bin resolution p0 - ')
         log.write(' ')
         log.write(str(float((p0_max-p0_min)/(p0_Nbin-1)))+'\n')
-        log.write('Bin resolution lw - ')
-        log.write(' ')
-        log.write(str(float((lw_max-lw_min)/(lw_Nbin-1)))+'\n')
         log.write('Used T1? - ')
         log.write(' ')
         log.write(str(UseT1)+'\n')

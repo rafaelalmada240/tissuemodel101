@@ -38,7 +38,7 @@ def restart_kernel_and_run_all_cells():
 # Plot frames from different time steps   
 
 
-def open_file(N):
+def open_file(foldername0,N,issubfolder):
     
     coords_list = []
     point_regions = []
@@ -51,8 +51,13 @@ def open_file(N):
         coords = []
         vorPointRegion1 = []
         vorRegions = []
+        
+        if issubfolder == 0:
+            foldername = foldername0+'movie_output/'
+        else:
+            foldername = foldername0
 
-        with open('movieoutput/centers'+str(i)+'.txt','r') as text:
+        with open(foldername+'centers'+str(i)+'.txt','r') as text:
                     for line in text:
                         last_line = (line.replace("\n","")).split(';')
                         coords.append([float(last_line[1]),float(last_line[2])])
@@ -70,7 +75,7 @@ def open_file(N):
         coords = np.array(coords)
 
         vertices = []
-        with open('movieoutput/vertices'+str(i)+'.txt','r') as text:
+        with open(foldername+'vertices'+str(i)+'.txt','r') as text:
                     for line in text:
                         last_line = (line.replace("\n","")).split(';')
                         vertices.append([float(last_line[1]),float(last_line[2])])
@@ -79,7 +84,7 @@ def open_file(N):
         #print(vorPointRegion)
 
         vorRidges = []
-        with open('movieoutput/edges'+str(i)+'.txt','r') as text:
+        with open(foldername+'edges'+str(i)+'.txt','r') as text:
                     for line in text:
                         last_line = (line.replace("\n","")).split(';')
                         l4 = last_line[1].replace("[","").replace("]","").split(',')
@@ -95,7 +100,7 @@ def open_file(N):
 
         wloc = 0
 
-        with open('movieoutput/woundloc'+str(i)+'.txt','r') as text:
+        with open(foldername+'woundloc'+str(i)+'.txt','r') as text:
             for line in text:
                 wloc = int(line.replace("\n",""))
 
@@ -104,7 +109,7 @@ def open_file(N):
             vorPointRegion.append(k)
 
         Boundaries = []                
-        with open('movieoutput/boundaries'+str(i)+'.txt','r') as text:
+        with open(foldername+'boundaries'+str(i)+'.txt','r') as text:
             for line in text:
                 last_line = line.replace("\n","")
                 l4 = line.replace("[","").replace("]","").split(',')
@@ -229,7 +234,19 @@ def makemovie(x_array, v_array, ridge_array,boundaries,regions,wloc):
 #main_path = pathlib.Path().absolute()
 datafileloadname = input('Number of points to open: ')
 #datafileloadname = datafileloadname + '.h5'
-data_set = open_file(int(datafileloadname))
+# foldername1 = input('Where is the movieoutput?: ')
+foldername2 = input('Which tissue?: ')
+foldername3 = input('Which wound size?: ')
+issubfolder = int(input('Is it in a sub-folder (y-1,n-0): '))
+if issubfolder==1:
+    whichl = input('p0? - ')
+    whichlw = input('lw? - ')
+    foldername1 = 'l'+whichl+'lw'+whichlw+'/'
+    foldername = 'tissues/tissue'+foldername2+'/size'+foldername3+'/movie_output/'+foldername1
+else:
+    foldername = 'tissues/tissue'+foldername2+'/size'+foldername3+'/'
+
+data_set = open_file(foldername,int(datafileloadname),issubfolder)
 
 coords_evo = np.array(data_set['centers'])
 print(coords_evo.shape)

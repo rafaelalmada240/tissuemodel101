@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def norm(vec):
     return np.sqrt(np.sum(vec**2))
 
@@ -43,7 +41,6 @@ def remove_minus(ridges):
     for j in index_to_remove:
         ridges.remove(j)
     return ridges
-
 
 def find_vertex_neighbour_vertices(ridges,vertex):
     
@@ -131,7 +128,6 @@ def find_center_neighbour_center(regions,point_region,center):
         List_centers = list(set(List_centers).union(L_c))
     List_centers.remove(center)
     return List_centers
-
 
 def find_boundary_vertices(n_vertices,ridges):
     '''

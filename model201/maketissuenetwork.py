@@ -226,7 +226,7 @@ L_max = 5
 L_min = -5  
 DeltaL = L_max - L_min
 
-foldername='tissue'
+foldername=input('Folder name for tissue: ')
 rTF.saveGeneratedNetwork(coords, size_of_wound,vorPointRegion,vorRegions,vorVertex,vorRidges,wound_loc,foldername)
 
 tf = time.time() - ti
@@ -236,7 +236,7 @@ with open(foldername+'/log_tissue_generation'+str(size_of_wound)+'.txt','a') as 
     log.write(' ')
     log.write(str(option_1)+'\n')
     
-    if size_of_wound== 1:
+    if size_of_wound<= 1:
         log.write('Single cell wound at - ')
         log.write(' ')
         log.write(str(wound_loc)+'\n')
@@ -245,17 +245,20 @@ with open(foldername+'/log_tissue_generation'+str(size_of_wound)+'.txt','a') as 
         log.write(' ')
         log.write(str(wound_loc)+'\n')
         
-    log.write('Edge shared by the regions, to be removed - ')
-    log.write(' ')
-    log.write(str(UnionIntersect)+'\n')
-
-    log.write('Vertex shared by multiple regions, to be removed - ')
-    log.write(' ')
-    log.write(str(TripleIntersect)+'\n')
+        log.write('Edge shared by the regions, to be removed - ')
+        log.write(' ')
+        log.write(str(UnionIntersect)+'\n')
+        
+        log.write('Regions removed - ')
+        log.write(' ')
+        log.write(str(wound_cells_loc)+'\n')
     
-    log.write('Regions removed - ')
-    log.write(' ')
-    log.write(str(wound_cells_loc)+'\n')
+    if size_of_wound>=3:
+        log.write('Vertex shared by multiple regions, to be removed - ')
+        log.write(' ')
+        log.write(str(TripleIntersect)+'\n')
+    
+    
     
     log.write('Number of remaining regions - ')
     log.write(' ')
@@ -263,4 +266,4 @@ with open(foldername+'/log_tissue_generation'+str(size_of_wound)+'.txt','a') as 
     
     log.write('Simulation time (s) - ')
     log.write(' ')
-    log.write(str(tf.round(3))+'\n')
+    log.write(str(tf)+'\n')
