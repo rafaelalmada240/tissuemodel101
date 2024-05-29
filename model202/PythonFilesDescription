@@ -1,0 +1,23 @@
+Module files
+- findconnections
+- movies_from_plots
+- randomlatticethermalized
+- readTissueFiles
+- selfpropelledparticlevoronoi
+- topologicaltransitions
+
+Execution files
+- maketissuenetwork
+- makenetworkmovie
+- runwoundhealingsimulations
+- makefiguresandgraphics
+
+General analysis of results files
+- GeneratedTissueVisualization
+
+NOTE WHEN GENERATED MULTIPLE-CELL WOUNDS:
+Before doing simulations it is recommended to first open the tissue in GeneratedTissueVisualization for manual edits. The primary edits required involve 
+A - Manually remove extra vertices in wound border (not from the dataset, but from any regions and edges where they may be present)
+Can't leave blank edges, but can delete them; Can leave blank vertices and cells, but can't delete vertices. This ensures all inner vertices have 3 neighbours and that the wound is convex
+B - Fix the boundary if there are any visible issues with it. 
+
